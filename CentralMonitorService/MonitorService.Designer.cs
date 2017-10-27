@@ -1,6 +1,6 @@
 ﻿namespace CentralMonitorService
 {
-    partial class Monitor
+    partial class MonitorService
     {
         /// <summary> 
         /// Required designer variable.

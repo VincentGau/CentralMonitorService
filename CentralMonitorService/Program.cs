@@ -14,12 +14,26 @@ namespace CentralMonitorService
         /// </summary>
         static void Main()
         {
-            ServiceBase[] ServicesToRun;
-            ServicesToRun = new ServiceBase[]
+            
+            if (Environment.UserInteractive)
             {
-                new Monitor()
-            };
-            ServiceBase.Run(ServicesToRun);
+                MonitorService s = new MonitorService();
+                s.DebugStart();
+                Console.Read();
+                s.DebugStop();
+            }
+
+            else
+            {
+                ServiceBase[] ServicesToRun;
+                ServicesToRun = new ServiceBase[]
+                {
+                    new MonitorService()
+                };
+                ServiceBase.Run(ServicesToRun);
+            }
+
+            
         }
     }
 }

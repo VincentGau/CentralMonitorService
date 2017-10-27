@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+    <website hostname="A01" url="http://www.baidu.com"></website>
+    <website hostname="A02" url="http://www.baidu.com"></website>
+    <website hostname="A03" url="http://www.baidu.com"></website>
+    <website hostname="A04" url="http://www.baidu.com"></website>
+    <website hostname="A05" url="http://www.baidu.com"></website>
+    <website hostname="A06" url="http://www.baidu.com"></website>
+</root>
