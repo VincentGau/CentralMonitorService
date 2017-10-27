@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2005
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CentralMonitorService", "CentralMonitorService\CentralMonitorService.csproj", "{DACA1EEE-F013-4D04-89F8-C61F4FD87277}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DACA1EEE-F013-4D04-89F8-C61F4FD87277}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DACA1EEE-F013-4D04-89F8-C61F4FD87277}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DACA1EEE-F013-4D04-89F8-C61F4FD87277}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DACA1EEE-F013-4D04-89F8-C61F4FD87277}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0B9BDC70-E014-473E-B4BC-EC4CDADBDA35}
+	EndGlobalSection
+EndGlobal
