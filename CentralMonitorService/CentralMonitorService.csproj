@@ -73,7 +73,7 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="log.config" />
+    <None Include="Log.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MonitorService.resx">
