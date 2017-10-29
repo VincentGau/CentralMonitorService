@@ -80,6 +80,7 @@ namespace CentralMonitorService
 
         public void checkSites()
         {
+            
             List<Website> siteList = GetSiteList();
             foreach (Website site in siteList)
             {

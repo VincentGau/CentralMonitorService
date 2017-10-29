@@ -8,6 +8,8 @@ using System.Linq;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
+using log4net;
+using log4net.Config;
 
 namespace CentralMonitorService
 {
@@ -52,14 +54,9 @@ namespace CentralMonitorService
         /// </summary>
         private void ServiceStart()
         {
-            //FileStream fs = new FileStream(@"c:\Workspace\xxxx.txt", FileMode.OpenOrCreate, FileAccess.Write);
-            //StreamWriter sw = new StreamWriter(fs);
-            //sw.BaseStream.Seek(0, SeekOrigin.End);
-            //sw.WriteLine("WindowsService: Service Started" + DateTime.Now.ToString() + "\n");
+            Logger.Info("Lalala");
 
-            //sw.Flush();
-            //sw.Close();
-            //fs.Close();
+
             WebpageDetector wd = new WebpageDetector();
             wd.checkSites();
         }
