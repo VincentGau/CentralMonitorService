@@ -41,7 +41,8 @@ namespace CentralMonitorService
             List<Website> siteList = new List<Website>();
             sitesFile = ConfigurationManager.AppSettings["SitesFile"];
 
-            if (!File.Exists(sitesFile))
+            string filePath = string.Format("{0}\\{1}", AppDomain.CurrentDomain.BaseDirectory, sitesFile);
+            if (!File.Exists(filePath))
             {
                 throw new FileNotFoundException("找不到监控站点配置文件。");
             }
@@ -59,33 +60,54 @@ namespace CentralMonitorService
                 siteList.Add(new Website(hostname, url));
             }
 
-            Console.WriteLine("获取站点列表完毕。");
+            //Console.WriteLine("获取站点列表完毕。");
+            Logger.Info("获取站点列表完毕。");
             return siteList;
         }
 
 
-        public void checkResponseCode(string url)
+        /// <summary>
+        /// 检查单个url 的返回码
+        /// </summary>
+        /// <param name="url"></param>
+        public string checkResponseCode(string url)
         {
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(url);
             try
             {
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-                Console.WriteLine(response.StatusCode);
+                //Console.WriteLine(response.StatusCode);
+                return response.StatusCode.ToString();
             }
             catch (WebException ex)
             {
-                Console.WriteLine(ex.ToString());
+                //Console.WriteLine(ex.ToString());
+                Logger.Error(string.Format("{0}. {1}", url, ex.ToString()));
+                return "Request failed.";
             }
+            
+
         }
 
-        public void checkSites()
+
+        /// <summary>
+        /// 检查站点返回码，返回请求失败的站点
+        /// </summary>
+        /// <param name="siteList">需要访问的所有站点</param>
+        /// <returns>返回请求失败的站点</returns>
+        public List<Website> checkSites(List<Website> siteList)
         {
-            
-            List<Website> siteList = GetSiteList();
+            List<Website> failedList = new List<Website>();
             foreach (Website site in siteList)
             {
-                checkResponseCode(site.url);
+                string resCode = checkResponseCode(site.url);
+                if (!resCode.Equals("OK"))
+                {
+                    failedList.Add(site);
+                }
             }
+            return failedList;
+
         }
         
     }

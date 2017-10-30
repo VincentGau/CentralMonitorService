@@ -56,7 +56,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LogHelper.cs" />
     <Compile Include="MonitorService.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -93,6 +92,7 @@
   <ItemGroup>
     <Content Include="Sites.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
