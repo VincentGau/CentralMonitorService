@@ -28,21 +28,22 @@ namespace CentralMonitorService
         protected override void OnStart(string[] args)
         {
             //ServiceStart();
-
+            Logger.Info("OnStart.");
             SetTimer();
-            Console.WriteLine("\nPress the Enter key to exit the application...\n");
-            Console.WriteLine("The application started at {0:HH:mm:ss.fff}", DateTime.Now);
-            Console.ReadLine();
-            timer.Stop();
-            timer.Dispose();
+            //Console.WriteLine("\nPress the Enter key to exit the application...\n");
+            //Console.WriteLine("The application started at {0:HH:mm:ss.fff}", DateTime.Now);
+            //Console.ReadLine();
+            //timer.Stop();
+            //timer.Dispose();
 
-            Console.WriteLine("Terminating the application...");
+            //Console.WriteLine("Terminating the application...");
         }
 
        
 
         protected override void OnStop()
         {
+            Logger.Info("Service Stopped.");
             ServiceStop();
         }
 
@@ -78,6 +79,7 @@ namespace CentralMonitorService
 
             else
             {
+                Logger.Info("有站点请求失败。");
                 StringBuilder sb = new StringBuilder();
                 foreach (Website site in failedList)
                 {
@@ -115,7 +117,7 @@ namespace CentralMonitorService
         private static void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
             string str = string.Format("The Elapsed event was raised at {0:HH:mm:ss.fff}", e.SignalTime);
-            Console.WriteLine(str);
+            //Console.WriteLine(str);
             Logger.Info(str);
             ServiceStart();
         }

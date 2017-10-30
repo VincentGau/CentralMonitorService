@@ -37,6 +37,7 @@ namespace CentralMonitorService
         /// <returns></returns>
         public List<Website> GetSiteList()
         {
+            Logger.Info("开始获取站点列表...");
             // 需要监控的站点列表
             List<Website> siteList = new List<Website>();
             sitesFile = ConfigurationManager.AppSettings["SitesFile"];
@@ -44,18 +45,23 @@ namespace CentralMonitorService
             string filePath = string.Format("{0}\\{1}", AppDomain.CurrentDomain.BaseDirectory, sitesFile);
             if (!File.Exists(filePath))
             {
+                Logger.Info("找不到监控站点配置文件。");
                 throw new FileNotFoundException("找不到监控站点配置文件。");
             }
+            Logger.Info(filePath);
 
             // 加载站点配置文件
             XmlDocument doc = new XmlDocument();
             doc.Load(sitesFile);
             XmlElement root = doc.DocumentElement;
+            Logger.Info(root.Name);
             XmlNodeList nodeList = root.GetElementsByTagName("website");
             foreach (XmlNode node in nodeList)
             {
                 string hostname = ((XmlElement)node).GetAttribute("hostname");
                 string url = ((XmlElement)node).GetAttribute("url");
+
+                Logger.Info(hostname + url);
 
                 siteList.Add(new Website(hostname, url));
             }
