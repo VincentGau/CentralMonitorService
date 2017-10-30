@@ -34,19 +34,14 @@ namespace CentralMonitorService
 
 
         /// <summary>
-        /// 调试service用
+        /// 用以调试service
         /// </summary>
-        internal void DebugStart()
+        /// <param name="args"></param>
+        internal void DebugMode(string[] args)
         {
-            ServiceStart();
-        }
-
-        /// <summary>
-        /// 调试service用
-        /// </summary>
-        internal void DebugStop()
-        {
-            ServiceStop();
+            OnStart(args);
+            Console.ReadLine();
+            OnStop();
         }
 
         /// <summary>
@@ -55,10 +50,10 @@ namespace CentralMonitorService
         private void ServiceStart()
         {
             Logger.Info("Lalala");
+            
 
-
-            WebpageDetector wd = new WebpageDetector();
-            wd.checkSites();
+            //WebpageDetector wd = new WebpageDetector();
+            //wd.checkSites();
         }
 
         /// <summary>

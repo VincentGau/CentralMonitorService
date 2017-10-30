@@ -41,7 +41,6 @@
             // 
             this.serviceInstaller1.Description = "HakuHaku";
             this.serviceInstaller1.ServiceName = "CMonitorService";
-            this.serviceInstaller1.StartType = System.ServiceProcess.ServiceStartMode.Automatic;
             // 
             // ProjectInstaller
             // 

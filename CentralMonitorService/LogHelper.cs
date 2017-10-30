@@ -7,12 +7,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace CentralMonitorService
 {
     
 
-    class LogHelper
+    public static class LogHelper
     {
-        
+        private static readonly ILog logger = LogManager.GetLogger("MyLogger");
+
+        public static void Info(string msg)
+        {
+            logger.Info(msg);
+        }
     }
 }

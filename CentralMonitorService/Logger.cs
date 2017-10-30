@@ -6,24 +6,46 @@ using System.Threading.Tasks;
 using log4net;
 using log4net.Config;
 using System.IO;
+using System.Configuration;
 
 namespace CentralMonitorService
 {
     public class Logger
     {
-        
-        private static readonly ILog log;
+        private static ILog logger;
 
         static Logger()
         {
-            FileInfo logCfg = new FileInfo(AppDomain.CurrentDomain.BaseDirectory + "Log.config");
-            XmlConfigurator.ConfigureAndWatch(logCfg);
-            log = LogManager.GetLogger("MyLogger");
+            Init();
         }
 
-        public static void Info(string message)
+        private static void Init()
         {
-            log.Info(message);
+            // 日志配置文件
+            string logConfigFile = ConfigurationManager.AppSettings["LogConfigFile"];
+            // logger名称
+            string loggerName = ConfigurationManager.AppSettings["LoggerName"];
+
+            if (string.IsNullOrEmpty(logConfigFile) || string.IsNullOrEmpty(loggerName))
+            {
+                //Console.WriteLine("没有设置日志配置文件或没有设置logger名称！");
+                throw new ArgumentException("没有设置日志配置文件或没有设置logger名称！");
+            }
+
+            string filePath = string.Format("{0}\\{1}", AppDomain.CurrentDomain.BaseDirectory, logConfigFile);
+            if (!File.Exists(filePath))
+            {
+                //Console.WriteLine("找不到日志配置文件！");
+                throw new FileNotFoundException("找不到日志配置文件！");
+            }
+
+            logger = LogManager.GetLogger(loggerName);
+
+        }
+
+        public static void Info(string msg)
+        {
+            logger.Info(msg);
         }
     }
 }

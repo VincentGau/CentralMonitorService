@@ -12,15 +12,14 @@ namespace CentralMonitorService
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
-        static void Main()
+        static void Main(string[] args)
         {
+            
             
             if (Environment.UserInteractive)
             {
                 MonitorService s = new MonitorService();
-                s.DebugStart();
-                Console.Read();
-                s.DebugStop();
+                s.DebugMode(args);
             }
 
             else
@@ -33,7 +32,7 @@ namespace CentralMonitorService
                 ServiceBase.Run(ServicesToRun);
             }
 
-            
+
         }
     }
 }
