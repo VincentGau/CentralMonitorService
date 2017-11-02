@@ -19,6 +19,9 @@ namespace CentralMonitorService
             Init();
         }
 
+        /// <summary>
+        /// 初始化日志配置
+        /// </summary>
         private static void Init()
         {
             // 日志配置文件

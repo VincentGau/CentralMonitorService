@@ -10,15 +10,16 @@ using System.Text;
 using System.Threading.Tasks;
 using log4net;
 using log4net.Config;
-using static CentralMonitorService.WebpageDetector;
 using System.Timers;
+using static CentralMonitorService.MonitorCore;
 
 namespace CentralMonitorService
 {
     public partial class MonitorService : ServiceBase
     {
+        private static object reentryLock = new object();
 
-        private static Timer timer; // 计时器
+        MonitorCore wd = MonitorCore.getInstance();
 
         public MonitorService()
         {
@@ -27,24 +28,18 @@ namespace CentralMonitorService
 
         protected override void OnStart(string[] args)
         {
-            //ServiceStart();
             Logger.Info("OnStart.");
-            SetTimer();
-            //Console.WriteLine("\nPress the Enter key to exit the application...\n");
-            //Console.WriteLine("The application started at {0:HH:mm:ss.fff}", DateTime.Now);
-            //Console.ReadLine();
-            //timer.Stop();
-            //timer.Dispose();
 
-            //Console.WriteLine("Terminating the application...");
-        }
+            // 定时器启动时立即执行一次
+            timer1_Elapsed(null, null);
 
-       
+        }       
 
         protected override void OnStop()
         {
             Logger.Info("Service Stopped.");
-            ServiceStop();
+            timer1.Stop();
+            timer1.Dispose();
         }
 
 
@@ -55,73 +50,58 @@ namespace CentralMonitorService
         internal void DebugMode(string[] args)
         {
             OnStart(args);
-            //Console.ReadLine();
+            Console.ReadLine();
             Console.WriteLine("Done.");
             OnStop();
         }
+        
 
         /// <summary>
-        ///     
+        /// 定时执行事件
         /// </summary>
-        private static void ServiceStart()
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void timer1_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Logger.Info("Service Start.");
-
-
-            WebpageDetector wd = new WebpageDetector();
-            List<Website> allSites = wd.GetSiteList();
-            List<Website> failedList = wd.checkSites(allSites);
-
-            if (failedList.Any() == false)
+            lock (reentryLock)  // 重入锁
             {
-                Logger.Info("所有站点正常。");
-            }
+                
+                List<Website> allSites = wd.GetSiteList();
+                List<Website> failedList = wd.checkSites(allSites);
 
-            else
-            {
-                Logger.Info("有站点请求失败。");
-                StringBuilder sb = new StringBuilder();
-                foreach (Website site in failedList)
+                if (allSites.Any() == false)
                 {
-                    sb.Append(site.url + ". ");
+                    Logger.Error("找不到监控配置文件或监控配置文件为空。");
+                    return;
                 }
 
-                Logger.Info(string.Format("Failed sites: {0}",sb.ToString()));
+                if (failedList.Any() == false)
+                {
+                    Logger.Info("所有站点正常。");
+                }
+
+                else
+                {
+                    Logger.Info("有站点请求失败。");
+                    StringBuilder sb = new StringBuilder();
+                    foreach (Website site in failedList)
+                    {
+                        sb.Append(site.url + ". ");
+                    }
+
+                    Logger.Info(string.Format("Failed sites: {0}", sb.ToString()));
+                }
             }
-            
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        private void ServiceStop()
+        public void test()
         {
-            FileStream fs = new FileStream(@"c:\Workspace\xxxx.txt", FileMode.OpenOrCreate, FileAccess.Write);
-            StreamWriter sw = new StreamWriter(fs);
-            sw.BaseStream.Seek(0, SeekOrigin.End);
-            sw.WriteLine("WindowsService: Service Stopped" + DateTime.Now.ToString() + "\n");
-            sw.Flush();
-            sw.Close();
-            fs.Close();
+            List<Website> sl = new List<Website>();
+            List<string> dl = new List<string>();
+            List<string> spl = new List<string>();
+
+            wd.getMonitorElements(out sl, out dl, out spl);
+
         }
-
-        private static void SetTimer()
-        {
-            // 每隔五分钟执行
-            timer = new Timer(1000*60*1);
-            timer.Elapsed += OnTimedEvent;
-            timer.AutoReset = true;
-            timer.Enabled = true;
-        }
-
-        private static void OnTimedEvent(Object source, ElapsedEventArgs e)
-        {
-            string str = string.Format("The Elapsed event was raised at {0:HH:mm:ss.fff}", e.SignalTime);
-            //Console.WriteLine(str);
-            Logger.Info(str);
-            ServiceStart();
-        }
-
-
     }
 }
