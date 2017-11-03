@@ -8,6 +8,7 @@ using System.IO;
 using System.Xml;
 using System.Net;
 using System.Data.SqlClient;
+using System.Text.RegularExpressions;
 
 namespace CentralMonitorService
 {
@@ -128,7 +129,7 @@ namespace CentralMonitorService
             catch (WebException ex)
             {
                 //Console.WriteLine(ex.ToString());
-                Logger.Error(string.Format("{0}. {1}", url, ex.ToString()));
+                Logger.Error(string.Format("请求站点异常：{0}. {1}", url, ex.ToString()));
                 return "Request failed.";
             }
             
@@ -156,16 +157,97 @@ namespace CentralMonitorService
 
         }
 
-        public bool connectDB()
-        {
-            using (SqlConnection conn = new SqlConnection())
-            {
-                conn.ConnectionString = "";
-                conn.Open();
-            }
-                
 
-            return true;
+
+        public bool connectDB(string ip, string dbName)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection())
+                {
+                    conn.ConnectionString = "Data Source=localhost;Initial Catalog=HakuTest;Integrated Security=True";
+                    conn.Open();
+                    return true;
+                }                
+            }
+
+            catch (Exception ex)
+            {
+                Logger.Error(string.Format("数据库连接异常: {0}. {1}，错误信息：{2}", ip, dbName, ex.ToString()));
+                Logger.Error("BLABLABLA...", ex);
+            }
+
+            return false;
+            
+        }
+
+
+
+        /// <summary>
+        /// 检查结售汇页面更新时间，成功返回Success字符串，否则返回错误信息字符串
+        /// </summary>
+        /// <returns></returns>
+        public string checkRatePage()
+        {
+            string url = "http://app.abchina.com/rateinfo/ratesearch.aspx?id=1";
+            string result = "";
+            string dateString = "";
+
+            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(url);
+            try
+            {
+                using(HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                {
+                    // html片段：<label id="Label2">每百单位外币兑换人民币   更新日期:2017年11月02日 09时18分</label></div>
+                    Stream respStream = response.GetResponseStream();
+                    using (StreamReader sr = new StreamReader(respStream, Encoding.GetEncoding("UTF-8")))
+                    {
+                        string htmlContent = sr.ReadToEnd();
+                        //Console.WriteLine(htmlContent);
+                        string expr = @"更新日期:(.*?)</label>";
+                        MatchCollection mc = Regex.Matches(htmlContent, expr);
+                        if (mc is null)
+                        {
+                            Logger.Error("结售汇页面找不到更新时间或页面格式已改变。");
+                            result = "结售汇页面找不到更新时间或页面格式已改变。";
+                            return result;
+                        }
+                        foreach(Match m in mc)
+                        {
+                            GroupCollection group = m.Groups;
+                            dateString = group[1].Value;
+                            Console.WriteLine(dateString);
+                        }
+                    }
+                }
+
+                DateTime dt = DateTime.ParseExact(dateString, "yyyy年MM月dd日 hh时mm分", null);
+                DateTime t1 = DateTime.Now;
+                TimeSpan ts = t1 - dt;
+
+                Console.WriteLine(dt);
+                Console.WriteLine(ts.TotalHours);
+
+                return "Success";
+
+            }
+            catch (WebException ex)
+            {
+                Logger.Error(string.Format("请求结售汇站点异常：{0}.", ex.ToString()));
+                return "请求结售汇站点异常。";
+            }
+
+            catch(FormatException ex)
+            {
+                Logger.Error("结售汇更新时间转换异常。", ex);
+                return "结售汇更新时间转换异常。";
+            }
+
+            catch(Exception ex)
+            {
+                Logger.Error("获取结售汇更新时间异常。", ex);
+                return "获取结售汇更新时间异常。";
+            }
         }
         
     }

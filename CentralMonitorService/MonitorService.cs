@@ -13,6 +13,7 @@ using log4net.Config;
 using System.Timers;
 using static CentralMonitorService.MonitorCore;
 
+
 namespace CentralMonitorService
 {
     public partial class MonitorService : ServiceBase
@@ -63,35 +64,36 @@ namespace CentralMonitorService
         /// <param name="e"></param>
         private void timer1_Elapsed(object sender, ElapsedEventArgs e)
         {
-            lock (reentryLock)  // 重入锁
-            {
-                
-                List<Website> allSites = wd.GetSiteList();
-                List<Website> failedList = wd.checkSites(allSites);
+            //lock (reentryLock)  // 重入锁
+            //{
 
-                if (allSites.Any() == false)
-                {
-                    Logger.Error("找不到监控配置文件或监控配置文件为空。");
-                    return;
-                }
+            //    List<Website> allSites = wd.GetSiteList();
+            //    List<Website> failedList = wd.checkSites(allSites);
 
-                if (failedList.Any() == false)
-                {
-                    Logger.Info("所有站点正常。");
-                }
+            //    if (allSites.Any() == false)
+            //    {
+            //        Logger.Error("监控配置文件为空。");
+            //        return;
+            //    }
 
-                else
-                {
-                    Logger.Info("有站点请求失败。");
-                    StringBuilder sb = new StringBuilder();
-                    foreach (Website site in failedList)
-                    {
-                        sb.Append(site.url + ". ");
-                    }
+            //    if (failedList.Any() == false)
+            //    {
+            //        Logger.Info("所有站点正常。");
+            //    }
 
-                    Logger.Info(string.Format("Failed sites: {0}", sb.ToString()));
-                }
-            }
+            //    else
+            //    {
+            //        Logger.Info("有站点请求失败。");
+            //        StringBuilder sb = new StringBuilder();
+            //        foreach (Website site in failedList)
+            //        {
+            //            sb.Append(site.url + ". ");
+            //        }
+
+            //        Logger.Info(string.Format("Failed sites: {0}", sb.ToString()));
+            //    }
+            //}
+            wd.checkRatePage();
         }
 
         public void test()

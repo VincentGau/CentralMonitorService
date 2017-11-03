@@ -70,5 +70,30 @@ namespace CentralMonitorService
         {
             logger.Fatal(msg);
         }
+
+        public static void Info(string msg, Exception e)
+        {
+            logger.Info(msg, e);
+        }
+
+        public static void Error(string msg, Exception e)
+        {
+            logger.Error(msg, e);
+        }
+
+        public static void Warn(string msg, Exception e)
+        {
+            logger.Warn(msg, e);
+        }
+
+        public static void Debug(string msg, Exception e)
+        {
+            logger.Debug(msg, e);
+        }
+
+        public static void Fatal(string msg, Exception e)
+        {
+            logger.Fatal(msg, e);
+        }
     }
 }
