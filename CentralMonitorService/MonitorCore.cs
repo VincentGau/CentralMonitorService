@@ -9,6 +9,8 @@ using System.Xml;
 using System.Net;
 using System.Data.SqlClient;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace CentralMonitorService
 {
@@ -181,10 +183,61 @@ namespace CentralMonitorService
             
         }
 
+        public string checkJSH()
+        {
+            string url = "http://ewealth.abchina.com/app/data/api/DataService/ExchangeRateV2";
+            string result = "Failed";
 
+            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(url);
+            try
+            {
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                {
+                    Stream respStream = response.GetResponseStream();
+                    using (StreamReader sr = new StreamReader(respStream, Encoding.GetEncoding("UTF-8")))
+                    {
+                        string htmlContent = sr.ReadToEnd();
+                        //Console.WriteLine(htmlContent);
+                        JObject jo = (JObject)JsonConvert.DeserializeObject(htmlContent);
+                        string jshTime = jo["Data"]["Table"][0]["PublishTime"].ToString();
+                        //Console.WriteLine(jshTime);
+
+                        DateTime dt = Convert.ToDateTime(jshTime);
+                        DateTime t1 = DateTime.Now;
+                        TimeSpan ts = t1 - dt;
+                        Console.WriteLine(ts.TotalHours);
+                        if(ts.TotalHours < 2)
+                        {
+                            result = "Normal";
+                            Logger.Info("结售汇牌价更新及时");
+                        }
+                        else
+                        {
+                            result = "Not in time";
+                            Logger.Warn("结售汇牌价更新不及时.");
+                        }
+                    }
+                }
+            }
+            catch (NullReferenceException ex)
+            {
+                Console.WriteLine("返回的Json数据里找不到结售汇牌价更新时间.");
+                Console.WriteLine(ex.ToString());
+                Logger.Error("返回的Json数据里找不到结售汇牌价更新时间.", ex);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                Logger.Error("获取结售汇更新时间失败。", ex);
+            }
+
+
+            return result;
+        }
 
         /// <summary>
-        /// 检查结售汇页面更新时间，成功返回Success字符串，否则返回错误信息字符串
+        /// DEPRECATED
+        /// 检查结售汇页面更新时间，成功返回Success字符串，否则返回错误信息字符串(页面弃用)
         /// </summary>
         /// <returns></returns>
         public string checkRatePage()

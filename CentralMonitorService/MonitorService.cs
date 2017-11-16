@@ -93,7 +93,7 @@ namespace CentralMonitorService
             //        Logger.Info(string.Format("Failed sites: {0}", sb.ToString()));
             //    }
             //}
-            wd.checkRatePage();
+            wd.checkJSH();
         }
 
         public void test()
