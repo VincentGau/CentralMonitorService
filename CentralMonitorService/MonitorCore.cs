@@ -11,15 +11,31 @@ using System.Data.SqlClient;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Net.Http;
+using System.Threading;
 
 namespace CentralMonitorService
 {
+    public class MonitorEventArgs : EventArgs
+    {
+        public int arg1 { get; set; }
+    }
     class MonitorCore
     {
         // 记录需要监控的站点的xml文件
         private static string sitesFile = "";
 
         private static MonitorCore uniqueInstance;
+
+        public event EventHandler<MonitorEventArgs> MonitorDone;
+
+        protected virtual void OnMonitorDone(int arg1)
+        {
+            if(MonitorDone != null)
+            {
+                MonitorDone(this, new MonitorEventArgs() { arg1 = 1 });
+            }
+        }
 
         private MonitorCore()
         {
@@ -47,6 +63,14 @@ namespace CentralMonitorService
             }
             public string hostname { get; set; }
             public string url { get; set; }
+        }
+
+        public void DoMonitor()
+        {
+            Console.WriteLine("Working...");
+            Thread.Sleep(3000);
+
+            OnMonitorDone(1);
         }
 
        
@@ -134,8 +158,6 @@ namespace CentralMonitorService
                 Logger.Error(string.Format("请求站点异常：{0}. {1}", url, ex.ToString()));
                 return "Request failed.";
             }
-            
-
         }
 
 
@@ -157,6 +179,27 @@ namespace CentralMonitorService
             }
             return failedList;
 
+        }
+
+        public async Task<string> getResponseAsync(string url)
+        {
+            HttpClient httpClient = new HttpClient();
+            var response = await httpClient.GetAsync(url);
+            return response.StatusCode.ToString();
+        }
+
+        public async Task<List<Website>> checkSitesAsync(List<Website> siteList)
+        {
+            List<Website> failedList = new List<Website>();
+            foreach (Website site in siteList)
+            {
+                string resCode = await getResponseAsync(site.url);
+                if (!resCode.Equals("OK"))
+                {
+                    failedList.Add(site);
+                }
+            }
+            return failedList;
         }
 
 

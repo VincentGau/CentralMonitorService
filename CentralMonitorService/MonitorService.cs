@@ -20,7 +20,8 @@ namespace CentralMonitorService
     {
         private static object reentryLock = new object();
 
-        MonitorCore wd = MonitorCore.getInstance();
+        MonitorCore monitorCore = MonitorCore.getInstance();
+        AlarmSender alarmSender = AlarmSender.getInstance();
 
         public MonitorService()
         {
@@ -30,6 +31,8 @@ namespace CentralMonitorService
         protected override void OnStart(string[] args)
         {
             Logger.Info("OnStart.");
+
+            monitorCore.MonitorDone += alarmSender.OnMonitorDone;
 
             // 定时器启动时立即执行一次
             timer1_Elapsed(null, null);
@@ -93,7 +96,8 @@ namespace CentralMonitorService
             //        Logger.Info(string.Format("Failed sites: {0}", sb.ToString()));
             //    }
             //}
-            wd.checkJSH();
+            //monitorCore.checkJSH();
+            monitorCore.DoMonitor();
         }
 
         public void test()
@@ -102,7 +106,7 @@ namespace CentralMonitorService
             List<string> dl = new List<string>();
             List<string> spl = new List<string>();
 
-            wd.getMonitorElements(out sl, out dl, out spl);
+            monitorCore.getMonitorElements(out sl, out dl, out spl);
 
         }
     }
