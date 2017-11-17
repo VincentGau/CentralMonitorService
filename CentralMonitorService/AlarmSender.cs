@@ -21,6 +21,13 @@ namespace CentralMonitorService
         public void OnMonitorDone(object source, MonitorEventArgs args)
         {
             Console.WriteLine("Sending alarm...");
+            List<Website> failedSites = args.argList;
+            StringBuilder sb = new StringBuilder();
+            foreach(Website site in failedSites)
+            {
+                sb.Append(site.url);
+            }
+            Logger.Info("ALARM! Failed sites: " + sb.ToString());
         }
     }
 }

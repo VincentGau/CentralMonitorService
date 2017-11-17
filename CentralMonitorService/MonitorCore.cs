@@ -18,9 +18,10 @@ namespace CentralMonitorService
 {
     public class MonitorEventArgs : EventArgs
     {
-        public int arg1 { get; set; }
+        public List<Website> argList { get; set; }
     }
-    class MonitorCore
+
+    partial class MonitorCore
     {
         // 记录需要监控的站点的xml文件
         private static string sitesFile = "";
@@ -29,12 +30,9 @@ namespace CentralMonitorService
 
         public event EventHandler<MonitorEventArgs> MonitorDone;
 
-        protected virtual void OnMonitorDone(int arg1)
+        protected virtual void OnMonitorDone(List<Website> siteList)
         {
-            if(MonitorDone != null)
-            {
-                MonitorDone(this, new MonitorEventArgs() { arg1 = 1 });
-            }
+            MonitorDone?.Invoke(this, new MonitorEventArgs() { argList = siteList });
         }
 
         private MonitorCore()
@@ -51,29 +49,30 @@ namespace CentralMonitorService
             return uniqueInstance;
         }
 
-        /// <summary>
-        /// Website 类，属性包括需要监控的站点的主机名，url，需要监控可用性的网页
-        /// </summary>
-        public class Website
-        {
-            public Website(string hostname, string url)
-            {
-                this.hostname = hostname;
-                this.url = url;
-            }
-            public string hostname { get; set; }
-            public string url { get; set; }
-        }
+        //public async void DoMonitor()
+        //{
+        //    //Console.WriteLine("Working...");
+        //    //Thread.Sleep(3000);
+        //    List<Website> failedSites = await checkSitesAsync(GetSiteList());
+        //    foreach(Website site in failedSites)
+        //    {
+        //        Logger.Info(site.url);
+        //    }
+
+        //    OnMonitorDone(1);
+        //}
 
         public void DoMonitor()
         {
-            Console.WriteLine("Working...");
-            Thread.Sleep(3000);
+            //Console.WriteLine("Working...");
+            //Thread.Sleep(3000);
+            List<Website> failedSites = checkSites(GetSiteList());
+            
 
-            OnMonitorDone(1);
+            OnMonitorDone(failedSites);
         }
 
-       
+
         /// <summary>
         /// 获取需要监控的要素，包括监控的网页可用性，数据库连接，页面内容
         /// </summary>
@@ -146,18 +145,23 @@ namespace CentralMonitorService
         public string checkResponseCode(string url)
         {
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(url);
+            string retString = null;
             try
             {
-                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                {
+                    retString = response.StatusCode.ToString();
+                }
                 //Console.WriteLine(response.StatusCode);
-                return response.StatusCode.ToString();
+                return retString;
             }
             catch (WebException ex)
             {
                 //Console.WriteLine(ex.ToString());
                 Logger.Error(string.Format("请求站点异常：{0}. {1}", url, ex.ToString()));
-                return "Request failed.";
+                retString = "Request failed.";
             }
+            return retString;
         }
 
 
@@ -181,13 +185,34 @@ namespace CentralMonitorService
 
         }
 
+        /// <summary>
+        /// 异步方式发送HTTP 请求
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public async Task<string> getResponseAsync(string url)
         {
-            HttpClient httpClient = new HttpClient();
-            var response = await httpClient.GetAsync(url);
-            return response.StatusCode.ToString();
+            string result = null;
+            try
+            {
+                HttpClient httpClient = new HttpClient();
+                var response = await httpClient.GetAsync(url);
+                result = response.StatusCode.ToString();
+            }
+            catch(Exception ex)
+            {
+                Logger.Error("站点请求异常。", ex);
+                result = "Request failed.";
+            }
+            return result;
+            
         }
 
+        /// <summary>
+        /// 异步方式完成大量HTTP 请求
+        /// </summary>
+        /// <param name="siteList"></param>
+        /// <returns></returns>
         public async Task<List<Website>> checkSitesAsync(List<Website> siteList)
         {
             List<Website> failedList = new List<Website>();
