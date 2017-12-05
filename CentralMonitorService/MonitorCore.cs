@@ -26,9 +26,14 @@ namespace CentralMonitorService
         // 记录需要监控的站点的xml文件
         private static string sitesFile = "";
 
+        // MonitorCore 实例
         private static MonitorCore uniqueInstance;
 
+        // 事件委托
         public event EventHandler<MonitorEventArgs> MonitorDone;
+
+        // 异常站点
+        private List<Website> failedSiteList = new List<Website>();
 
         protected virtual void OnMonitorDone(List<Website> siteList)
         {
@@ -49,27 +54,25 @@ namespace CentralMonitorService
             return uniqueInstance;
         }
 
-        //public async void DoMonitor()
-        //{
-        //    //Console.WriteLine("Working...");
-        //    //Thread.Sleep(3000);
-        //    List<Website> failedSites = await checkSitesAsync(GetSiteList());
-        //    foreach(Website site in failedSites)
-        //    {
-        //        Logger.Info(site.url);
-        //    }
-
-        //    OnMonitorDone(1);
-        //}
+        
 
         public void DoMonitor()
         {
-            //Console.WriteLine("Working...");
-            //Thread.Sleep(3000);
-            List<Website> failedSites = checkSites(GetSiteList());
-            
 
-            OnMonitorDone(failedSites);
+            //List<Website> failedSites = checkSites(GetSiteList());
+
+            List<Website> siteList = new List<Website>();
+            List<string> dbList = new List<string>();
+            List<string> reservedList = new List<string>();
+
+            getMonitorElements(out siteList, out dbList, out reservedList);
+
+            Parallel.ForEach(siteList, (i) =>
+            {
+                checkResponseCodeParallel(i);
+            });
+
+            OnMonitorDone(failedSiteList);
         }
 
 
@@ -162,6 +165,33 @@ namespace CentralMonitorService
                 retString = "Request failed.";
             }
             return retString;
+        }
+
+        public void checkResponseCodeParallel(Website site)
+        {
+            
+            string retString = null;
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(site.url);
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                {
+                    retString = response.StatusCode.ToString();
+                    if(!retString.Equals("OK"))
+                    {
+                        failedSiteList.Add(site);
+                    }
+                }
+            }
+            catch (WebException ex)
+            {
+                Logger.Error(string.Format("请求站点异常：{0}. {1}", site.url, ex.ToString()));
+                failedSiteList.Add(site);
+            }
+            //catch(Exception ex)
+            //{
+            //    Logger.Error(string.Format("请求站点异常：{0}. {1}", site.url, ex.ToString()));
+            //}
         }
 
 

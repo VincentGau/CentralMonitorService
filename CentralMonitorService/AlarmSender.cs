@@ -27,6 +27,7 @@ namespace CentralMonitorService
             {
                 sb.Append(site.url);
             }
+            Console.WriteLine("Failed sites: ", sb.ToString());
             Logger.Info("ALARM! Failed sites: " + sb.ToString());
         }
     }

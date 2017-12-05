@@ -67,47 +67,11 @@ namespace CentralMonitorService
         /// <param name="e"></param>
         private void timer1_Elapsed(object sender, ElapsedEventArgs e)
         {
-            //lock (reentryLock)  // 重入锁
-            //{
-
-            //    List<Website> allSites = wd.GetSiteList();
-            //    List<Website> failedList = wd.checkSites(allSites);
-
-            //    if (allSites.Any() == false)
-            //    {
-            //        Logger.Error("监控配置文件为空。");
-            //        return;
-            //    }
-
-            //    if (failedList.Any() == false)
-            //    {
-            //        Logger.Info("所有站点正常。");
-            //    }
-
-            //    else
-            //    {
-            //        Logger.Info("有站点请求失败。");
-            //        StringBuilder sb = new StringBuilder();
-            //        foreach (Website site in failedList)
-            //        {
-            //            sb.Append(site.url + ". ");
-            //        }
-
-            //        Logger.Info(string.Format("Failed sites: {0}", sb.ToString()));
-            //    }
-            //}
-            //monitorCore.checkJSH();
-            monitorCore.DoMonitor();
-        }
-
-        public void test()
-        {
-            List<Website> sl = new List<Website>();
-            List<string> dl = new List<string>();
-            List<string> spl = new List<string>();
-
-            monitorCore.getMonitorElements(out sl, out dl, out spl);
-
+            lock (reentryLock)  // 重入锁
+            {
+                monitorCore.DoMonitor();
+            }
+            
         }
     }
 }
